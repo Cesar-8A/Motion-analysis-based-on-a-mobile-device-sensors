@@ -1,51 +1,42 @@
-import tkinter as tk
+import tkinter 
+import time
 
-class Main:
-    def __init__(self, master):
-        self.master = master
-        self.master.configure(bg = "blue")
-        master.title("MABOAMDS")
-        master.geometry("1280x720")
-        master.resizable(False, False)
+#Main screen definition
+Main = tkinter.Tk()
+Main.geometry("600x200")
 
-        #boton
-        self.btn1 = tk.Button(master, text="Análisis de postura", command=self.posture)
-        self.btn1.pack(side = "right", padx = 30)
+patients_codes = (1512,1541521,128,25626)
 
-        #boton
-        self.btn2 = tk.Button(master, text="Análisis de carrera", command=self.running)
-        self.btn2.pack(side = "left", padx = 30)
+#Text messages
+Tag1 = tkinter.Label(Main, text = "Welcome back Dr. *********", font="Arial 22")
+Tag2 = tkinter.Label(Main, text = "Please enter the patient's code ", font="Arial 16")
+Tag3 = tkinter.Label(Main, text = "Patient's code does not exist, try again", font="Arial 12", bg="red")
+Tag4 = tkinter.Label(Main, text = "Loading info.....", font="Arial 12")
+Tag1.pack()
+Tag2.pack()
 
-    def posture(self):
-        self.master.destroy()
+#Read entry
+def ReadPatient():
+    patient_selection = int(Patient_selection.get())
+    if not patient_selection in patients_codes:
+        Tag3.pack()
+        Patient_selection.delete(0,tkinter.END)
+    else:
+        Tag3.pack_forget()
+        Tag4.pack()
+        Patient_selection.pack_forget()
+        boton1.pack_forget()
+        time.sleep(2)
+        Main.destroy()
+        
+ 
+#Definition of the button
+boton1 = tkinter.Button(Main, text="Entry", command=ReadPatient)
+boton1.pack(side="bottom")
 
-        posture_window = tk.Toplevel()
-        mi_ventana1 = Posture_window(posture_window)
+#Box of text 
+Patient_selection =  tkinter.Entry(Main)
+Patient_selection.pack(side="bottom")
+Patient_selection.bind("<Return>", lambda event: ReadPatient())
 
-    def running(self):
-        self.master.destroy()
-
-        runnig_window = tk.Toplevel()
-        mi_ventana2 = Runnig_window(runnig_window)
-
-
-class Running_window:
-    def __init__(self, master):
-        self.master = master
-        master.title("Running analysis")
-
-        label1 = tk.Label(master, text="Proximamente")
-        label1.pack()
-
-class Posture_window:
-    def __init__(self, master):
-        self.master = master
-        master.title("Posture analysis")
-
-        label2 = tk.Label(master, text="solo en cines")
-        label2.pack()
-
-root = tk.Tk()
-mi_ventana_principal = Main(root)
-
-root.mainloop()
+Main.mainloop()
