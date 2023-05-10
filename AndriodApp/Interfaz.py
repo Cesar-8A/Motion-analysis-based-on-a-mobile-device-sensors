@@ -22,15 +22,13 @@ Height_tag = tkinter.Label(Patient_main, text="Height: ", font="Arial 12")
 Height_value = tkinter.Label(Patient_main, text=height, font="Arial 12")
 
 #Posture button widgets
-Info_posture = tkinter.Label(Patient_main, text="Select a video to start", font="Arial 14")
-Load_button = tkinter.Button(Patient_main, text="Load", command=load_archive)
+Info_posture = tkinter.Label(Patient_main, text="Select a video to start", font="Arial 18")
+Load_button = tkinter.Button(Patient_main, text="Load", command=load_archive,width=10, height=1)
 
 def show_posture():
     hide_body_measure()
-    #Info_posture = tkinter.Label(Patient_main, text="Select a video to start", font="Arial 14")
-    #Load_button = tkinter.Button(Patient_main, text="Load", command=load_archive)
-    Info_posture.place(x=280, y=100)
-    Load_button.place(x=500, y=100)
+    Info_posture.place(x=730, y=25)
+    Load_button.place(x=800, y=100)
 
 def hide_posture():
     Info_posture.place_forget()
@@ -39,12 +37,9 @@ def hide_posture():
 
 def show_body_measure():
     hide_posture()
-    #Info_body_measure = tkinter.Label(Patient_main, text="Actual values", font="Arial 16")
-    #Height_tag = tkinter.Label(Patient_main, text="Height: ", font="Arial 12")
-    #Height_value = tkinter.Label(Patient_main, text=str(height), font="Arial 12")
-    Info_body_measure.place(x=280, y=100)
-    Height_value.place(x=330, y=200)
-    Height_tag.place(x=280, y=200)
+    Info_body_measure.place(x=700, y=25)
+    Height_value.place(x=350, y=200)
+    Height_tag.place(x=300, y=200)
 
 def hide_body_measure():
     Info_body_measure.place_forget()
