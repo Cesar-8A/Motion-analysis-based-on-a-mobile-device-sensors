@@ -1,16 +1,17 @@
 import tkinter
-import cv2 as cv 
 from tkinter import filedialog
-import time
-
+from PIL import Image
+from PIL import ImageTk
+from Squat import squat_ana
 
 Patient_main = tkinter.Tk()
 Patient_main.geometry("1280x720")
 Patient_main.resizable("false","false")
 
 def load_archive():
-    video_path = filedialog.askopenfilename()
-    video = cv.VideoCapture(video_path)
+    video_path = filedialog.askopenfilename(filetypes=[("all video files",".mp4")])
+
+    squat_ana(video_path,Video_label,Patient_main)
 
 height = 120
 
@@ -24,11 +25,13 @@ Height_value = tkinter.Label(Patient_main, text=height, font="Arial 12")
 #Posture button widgets
 Info_posture = tkinter.Label(Patient_main, text="Select a video to start", font="Arial 18")
 Load_button = tkinter.Button(Patient_main, text="Load", command=load_archive,width=10, height=1)
+Video_label = tkinter.Label(Patient_main)
 
 def show_posture():
     hide_body_measure()
     Info_posture.place(x=730, y=25)
     Load_button.place(x=800, y=100)
+    Video_label.place(x=700, y=125)
 
 def hide_posture():
     Info_posture.place_forget()
@@ -53,9 +56,9 @@ Body_measure = tkinter.Button(Patient_main, text="Modify body measure as height,
 Posture_button = tkinter.Button(Patient_main, text="Posture analyzer", font="Arial 12",command=show_posture, width=25, height=2,wraplength=200)
 Walk_button = tkinter.Button(Patient_main, text="Step analyzer", font="Arial 12", width=25, height=2,wraplength=200)
 
-Body_measure.place(x = 20,y = 50)
-Posture_button.place(x = 20, y = 120)
-Walk_button.place(x = 20, y = 190)
+Body_measure.grid(column=0,row=0,padx=25,pady=15)
+Posture_button.grid(column=0,row=1,pady=15)
+Walk_button.grid(column=0,row=2,pady=15)
 
 Buttons_background.create_rectangle(0, 0, 280, 720, fill="green")
 
