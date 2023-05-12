@@ -4,6 +4,22 @@ def squat_ana(path):
   import numpy as np
   import moviepy.editor as mpy
   import math
+  import matplotlib.pyplot as plt
+
+  def central_angle(vertex1, vertex2, vertex3):
+      # Calcula la longitud de cada lado del triángulo
+      a = math.dist(vertex1, vertex2)
+      b = math.dist(vertex2, vertex3)
+      c = math.dist(vertex3, vertex1)
+      # Calcula el coseno del ángulo central correspondiente al lado b
+      cos_B = (a**2 + c**2 - b**2) / (2 * a * c)
+      # Calcula el ángulo central correspondiente al lado b
+      angle = 2 * math.acos(cos_B)
+      angle = math.degrees(angle)
+      if(angle >= 90):
+        angle = abs((angle - 180))
+      # Convierte el ángulo a grados y lo devuelve
+      return(angle)
 
   mp_drawing = mp.solutions.drawing_utils
   mp_drawing_styles = mp.solutions.drawing_styles
@@ -49,6 +65,17 @@ def squat_ana(path):
   cap = cv2.VideoCapture(path)
   # Obtiene la velocidad de fotogramas (fps)
   frames_amount = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) 
+
+  x = 0
+  y = 1
+  deep_hip = []
+  knee_wrong = []
+  step = 0
+  step_brake_knee = 0
+  step_brake_hip = 0
+  step_brake = 0
+  holder = 0
+
   fps = cap.get(cv2.CAP_PROP_FPS)
   if not cap.isOpened():
     print('Failed opening video')
@@ -77,95 +104,72 @@ def squat_ana(path):
           # Adding frame with its index
           empty.append(frame_num)
         else:
-          for key,i in zip(data.keys(), range(33)):
+          for key, i in zip(data.keys(), range(33)):
             data[key].append([results.pose_landmarks.landmark[i].x, results.pose_landmarks.landmark[i].y, results.pose_landmarks.landmark[i].z])
         #Draw the landmarks
-        image.flags.writeable = True
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)      
-        mp_drawing.draw_landmarks(
-            image,
-            results.pose_landmarks,
-            mp_pose.POSE_CONNECTIONS,
-            landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
-        #Save the image in a mtrix
-        images.append(image)
-        # Flip the image horizontally for a selfie-view display.
-    #Make them numpy
-    for key in data.keys():
-      data[key] = np.array(data[key])
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    cap.release()
+            image.flags.writeable = True
+            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)      
+            mp_drawing.draw_landmarks(
+                image,
+                results.pose_landmarks,
+                mp_pose.POSE_CONNECTIONS,
+                landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+            #Save the image in a mtrix
+          if(((results.pose_landmarks.landmark[25].y - results.pose_landmarks.landmark[23].y) < -0.030) or ((results.pose_landmarks.landmark[26].y - results.pose_landmarks.landmark[24].y) < -0.030 )):
+            deep_hip.append(step)
+            step_brake_hip = 1
+            cv2.putText(image, "Too deep hip movement" , (0,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (100,255,100), 2)
+          A = np.array([results.pose_landmarks.landmark[31].x, results.pose_landmarks.landmark[31].y])
+          C = np.array([results.pose_landmarks.landmark[25].x, results.pose_landmarks.landmark[25].y])
+          B = np.array([results.pose_landmarks.landmark[27].x, results.pose_landmarks.landmark[27].y])
+          angle_calculated_left = central_angle(A, B, C)
+          
+          A = np.array([results.pose_landmarks.landmark[32].x, results.pose_landmarks.landmark[32].y])
+          C = np.array([results.pose_landmarks.landmark[26].x, results.pose_landmarks.landmark[26].y])
+          B = np.array([results.pose_landmarks.landmark[28].x, results.pose_landmarks.landmark[28].y])
+          angle_calculated_right = central_angle(A, B, C)
+          angle_calculated = (angle_calculated_left + angle_calculated_right) / 2
+          if (angle_calculated < 55):
+            knee_wrong.append(step)
+            step_brake_knee = 1
+            cv2.putText(image, "Wrong knee position" , (0,150), cv2.FONT_HERSHEY_SIMPLEX, 1, (100,255,100), 2)
+        step += 1
+        #cv2.imshow('Process',image)
+        plt.imshow(image)
+        plt.pause(0.01)
 
-  x = 0
-  y = 1
+        if(step_brake_hip or step_brake_knee):
+          step_brake = 1
+        else:
+          step_brake = 0
+          holder = 0
+
+        if(step_brake == 1 and holder == 0):
+          holder = 1
+          print("Error detected")
+          input()
+        step_brake_hip = 0
+        step_brake_knee = 0
+        images.append(image)
+
+        # Flip the image horizontally for a selfie-view display.
+      #Make them numpy
+      for key in data.keys():
+        data[key] = np.array(data[key])
+      width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+      height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+      cap.release()
 
   for keys in data.keys():
     for i in range(len(data[keys][:])):
       cv2.circle(images[i], (int(data[keys][i,x]*width), int(data[keys][i,y]*height)), radius=5, color=[255,0,0], thickness=-1)
 
-  #Detection of start pose
-
-  distance_shoulder_heel = []
-  for i in range(frames_amount):
-    a = ((data["RIGHT_HEEL"][i,y] - data["RIGHT_SHOULDER"][i,y]) + (data["LEFT_HEEL"][i,y] - data["LEFT_SHOULDER"][i,y]) / 2)
-    distance_shoulder_heel.append(a)
-  for i in range(frames_amount):
-    if ((max(distance_shoulder_heel) - distance_shoulder_heel[i]) > 0.15):
-      distance_shoulder_heel[i] = 0
-
-  #Too deep down hips movement
-  deep_hip = []
-  for i in range(frames_amount):
-    if(distance_shoulder_heel[i] < 0.1):
-      if(((data["LEFT_KNEE"][i,y] - data["LEFT_HIP"][i,y]) < -0.030) or ((data["RIGHT_KNEE"][i,y] - data["RIGHT_HIP"][i,y]) < -0.030)):
-        deep_hip.append(i)
-
-  def central_angle(vertex1, vertex2, vertex3):
-      # Calcula la longitud de cada lado del triángulo
-      a = math.dist(vertex1, vertex2)
-      b = math.dist(vertex2, vertex3)
-      c = math.dist(vertex3, vertex1)
-      # Calcula el coseno del ángulo central correspondiente al lado b
-      cos_B = (a**2 + c**2 - b**2) / (2 * a * c)
-      # Calcula el ángulo central correspondiente al lado b
-      angle = 2 * math.acos(cos_B)
-      angle = math.degrees(angle)
-      if(angle >= 90):
-        angle = abs((angle - 180))
-      # Convierte el ángulo a grados y lo devuelve
-      return(angle)
-
-  #Wrong knee movement
-  knee_wrong = []
-  for i in range(frames_amount):
-    if(distance_shoulder_heel[i] < 0.1):
-      A = np.array([data["LEFT_FOOT_INDEX"][i,x], data["LEFT_FOOT_INDEX"][i,y]])
-      C = np.array([data["LEFT_KNEE"][i,x], data["LEFT_KNEE"][i,y]])
-      B = np.array([data["LEFT_ANKLE"][i,x], data["LEFT_ANKLE"][i,y]])
-      angle_calculated_left = central_angle(A, B, C)
-      
-      A = np.array([data["RIGHT_FOOT_INDEX"][i,x], data["RIGHT_FOOT_INDEX"][i,y]])
-      C = np.array([data["RIGHT_KNEE"][i,x], data["RIGHT_KNEE"][i,y]])
-      B = np.array([data["RIGHT_ANKLE"][i,x], data["RIGHT_ANKLE"][i,y]])
-      angle_calculated_right = central_angle(A, B, C)
-      angle_calculated = (angle_calculated_left + angle_calculated_right) / 2
-      if (angle_calculated < 55):
-        knee_wrong.append(i)
-  #video anotations
-  for i in range(len(knee_wrong)):
-    editando = images[knee_wrong[i]]
-    cv2.putText(editando, "Wrong knee position" , (0,150), cv2.FONT_HERSHEY_SIMPLEX, 1, (100,255,100), 2)
-    images[knee_wrong[i]] = editando
-  for i in range(len(deep_hip)):
-    editando = images[knee_wrong[i]]
-    cv2.putText(editando, "Too deep hip movement" , (0,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (100,255,100), 2)
-    images[knee_wrong[i]] = editando
   #Print in terminal movement evaluation
   knee_errors_percent = 100 - (len(knee_wrong) / frames_amount) *100
   hip_errors_percent = 100 - (len(deep_hip) / frames_amount) * 100
   print("Se tuvo una presición de la rodilla en un %.2f " % (knee_errors_percent))
   print("Se tuvo una presición de la cadera en un %.2f " % (hip_errors_percent))
+
   # Crear un clip de ejemplo con un par de cuadros
   W, H = 1280, 720
   duration = 6  # duración del video en segundos
@@ -174,7 +178,7 @@ def squat_ana(path):
 
   # Crear un clip a partir de los cuadros
   clip = mpy.ImageSequenceClip(images, fps=fps)
-
   # Guardar el clip en formato mp4
-  clip.write_videofile('media.mp4')
+  clip.write_videofile('squat_2_procesado.mp4')
 
+squat_ana("D:\squat_2.mp4")
