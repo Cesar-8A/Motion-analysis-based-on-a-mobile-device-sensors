@@ -11,7 +11,7 @@ Patient_main.resizable("false","false")
 def load_archive():
     video_path = filedialog.askopenfilename(filetypes=[("all video files",".mp4")])
 
-    squat_ana(video_path,Video_label,Patient_main)
+    squat_ana(video_path,Video_label)
 
 height = 120
 

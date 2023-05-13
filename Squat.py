@@ -1,4 +1,4 @@
-def squat_ana(path,Video_label,Patient_main):
+def squat_ana(path,Video_label):
   import cv2
   import mediapipe as mp
   import numpy as np
@@ -114,56 +114,7 @@ def squat_ana(path,Video_label,Patient_main):
                 results.pose_landmarks,
                 mp_pose.POSE_CONNECTIONS,
                 landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
-            #Save the image in a mtrix
-          """
-          if(((results.pose_landmarks.landmark[25].y - results.pose_landmarks.landmark[23].y) < -0.030) or ((results.pose_landmarks.landmark[26].y - results.pose_landmarks.landmark[24].y) < -0.030 )):
-            deep_hip.append(step)
-            step_brake_hip = 1
-            cv2.putText(image, "Too deep hip movement" , (0,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (100,255,100), 2)
-          A = np.array([results.pose_landmarks.landmark[31].x, results.pose_landmarks.landmark[31].y])
-          C = np.array([results.pose_landmarks.landmark[25].x, results.pose_landmarks.landmark[25].y])
-          B = np.array([results.pose_landmarks.landmark[27].x, results.pose_landmarks.landmark[27].y])
-          angle_calculated_left = central_angle(A, B, C)
-          
-          A = np.array([results.pose_landmarks.landmark[32].x, results.pose_landmarks.landmark[32].y])
-          C = np.array([results.pose_landmarks.landmark[26].x, results.pose_landmarks.landmark[26].y])
-          B = np.array([results.pose_landmarks.landmark[28].x, results.pose_landmarks.landmark[28].y])
-          angle_calculated_right = central_angle(A, B, C)
-          angle_calculated = (angle_calculated_left + angle_calculated_right) / 2
-          if (angle_calculated < 55):
-            knee_wrong.append(step)
-            step_brake_knee = 1
-            cv2.putText(image, "Wrong knee position" , (0,150), cv2.FONT_HERSHEY_SIMPLEX, 1, (100,255,100), 2)
-        step += 1
-        #cv2.imshow('Process',image)
-        #plt.imshow(image)
-        #plt.pause(0.01)
-
-        Video_label.destroy()
-        Video_label = tkinter.Label(Patient_main)
-        Video_label.place(x=700, y=125)
-
-        im_pil = Image.fromarray(np.uint8(image))
-        im_pil = im_pil.resize((int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 2), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 2)))
-        img = ImageTk.PhotoImage(image=im_pil)
-        Video_label.configure(image=img)
-        Video_label.image = img
-        time.sleep(0.25)
-
-
-        if(step_brake_hip or step_brake_knee):
-          step_brake = 1
-        else:
-          step_brake = 0
-          holder = 0
-
-        if(step_brake == 1 and holder == 0):
-          holder = 1
-          print("Error detected")
-          input()
-        step_brake_hip = 0
-        step_brake_knee = 0
-        """
+        #Save the image in a mtrix
         images.append(image)
 
         # Flip the image horizontally for a selfie-view display.
@@ -216,6 +167,17 @@ def squat_ana(path,Video_label,Patient_main):
     cv2.putText(editando, "Too deep hip movement" , (0,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (100,255,100), 2)
     images[knee_wrong[i]] = editando
 
+  # Crear un clip de ejemplo con un par de cuadros
+  W, H = 1280, 720
+  duration = 6  # duración del video en segundos
+  fps = 30  # cuadros por segundo
+  num_frames = duration * fps
+
+  # Crear un clip a partir de los cuadros
+  clip = mpy.ImageSequenceClip(images, fps=fps)
+  # Guardar el clip en formato mp4
+  clip.write_videofile('squat_procesado.mp4')
+
   #show in tkinter window
   global step_brake
   step_brake = 0
@@ -235,22 +197,8 @@ def squat_ana(path,Video_label,Patient_main):
         step_brake = 1
         print("Error detected")
         input()
-        time.sleep(2)
       if(not (p in knee_wrong or p in deep_hip) and step_brake == 1):
         step_brake = 0
       p += 1
-      Video_label.after(10, show)
+      Video_label.after(40, show)
   show()
-
-
-  # Crear un clip de ejemplo con un par de cuadros
-  W, H = 1280, 720
-  duration = 6  # duración del video en segundos
-  fps = 30  # cuadros por segundo
-  num_frames = duration * fps
-
-  # Crear un clip a partir de los cuadros
-  clip = mpy.ImageSequenceClip(images, fps=fps)
-  # Guardar el clip en formato mp4
-  clip.write_videofile('squat_procesado.mp4')
-
