@@ -127,37 +127,52 @@ def squat_ana(path,Video_label,Info_posture,Load_button):
     for i in range(len(data[keys][:])):
       cv2.circle(images[i], (int(data[keys][i,x]*width), int(data[keys][i,y]*height)), radius=5, color=[255,0,0], thickness=-1)
 
+  #Detection of start pose
+  distance_shoulder_heel = []
+
+  for i in range(frames_amount):
+    a = ((data["RIGHT_HEEL"][i,y] - data["RIGHT_SHOULDER"][i,y]) + (data["LEFT_HEEL"][i,y] - data["LEFT_SHOULDER"][i,y]) / 2)
+    distance_shoulder_heel.append(a)
+
+  holder = min(distance_shoulder_heel)
+
+  for i in range(frames_amount):
+    if (abs(holder - distance_shoulder_heel[i]) > 0.15):
+      distance_shoulder_heel[i] = 0
+  
   #Too deep down hips movement
   deep_hip = []
   for i in range(frames_amount - 1):
-    A = np.array([data["LEFT_HIP"][i,x], data["LEFT_HIP"][i,y]])
-    C = np.array([data["LEFT_KNEE"][i,x], data["LEFT_KNEE"][i,y]])
-    B = np.array([data["LEFT_ANKLE"][i,x], data["LEFT_ANKLE"][i,y]])
-    angle_calculated_left = central_angle(A, B, C)
-    
-    A = np.array([data["RIGHT_HIP"][i,x], data["RIGHT_HIP"][i,y]])
-    C = np.array([data["RIGHT_KNEE"][i,x], data["RIGHT_KNEE"][i,y]])
-    B = np.array([data["RIGHT_ANKLE"][i,x], data["RIGHT_ANKLE"][i,y]])
-    angle_calculated_right = central_angle(A, B, C)
-    angle_calculated = (angle_calculated_left + angle_calculated_right) / 2
-    if (angle_calculated < 50):
-      deep_hip.append(i)
+    if(distance_shoulder_heel[i] > 0):
+      A = np.array([data["LEFT_HIP"][i,x], data["LEFT_HIP"][i,y]])
+      C = np.array([data["LEFT_KNEE"][i,x], data["LEFT_KNEE"][i,y]])
+      B = np.array([data["LEFT_ANKLE"][i,x], data["LEFT_ANKLE"][i,y]])
+      angle_calculated_left = central_angle(A, B, C)
+      
+      A = np.array([data["RIGHT_HIP"][i,x], data["RIGHT_HIP"][i,y]])
+      C = np.array([data["RIGHT_KNEE"][i,x], data["RIGHT_KNEE"][i,y]])
+      B = np.array([data["RIGHT_ANKLE"][i,x], data["RIGHT_ANKLE"][i,y]])
+      angle_calculated_right = central_angle(A, B, C)
+      angle_calculated = (angle_calculated_left + angle_calculated_right) / 2
+      if (angle_calculated < 50):
+        deep_hip.append(i)
 
   #Wrong knee movement
   knee_wrong = []
   for i in range(frames_amount - 1):
-    A = np.array([data["LEFT_FOOT_INDEX"][i,x], data["LEFT_FOOT_INDEX"][i,y]])
-    C = np.array([data["LEFT_KNEE"][i,x], data["LEFT_KNEE"][i,y]])
-    B = np.array([data["LEFT_ANKLE"][i,x], data["LEFT_ANKLE"][i,y]])
-    angle_calculated_left = central_angle(A, B, C)
-    
-    A = np.array([data["RIGHT_FOOT_INDEX"][i,x], data["RIGHT_FOOT_INDEX"][i,y]])
-    C = np.array([data["RIGHT_KNEE"][i,x], data["RIGHT_KNEE"][i,y]])
-    B = np.array([data["RIGHT_ANKLE"][i,x], data["RIGHT_ANKLE"][i,y]])
-    angle_calculated_right = central_angle(A, B, C)
-    angle_calculated = (angle_calculated_left + angle_calculated_right) / 2
-    if (angle_calculated < 55):
-      knee_wrong.append(i)
+    if(distance_shoulder_heel[i] > 0):
+      A = np.array([data["LEFT_FOOT_INDEX"][i,x], data["LEFT_FOOT_INDEX"][i,y]])
+      C = np.array([data["LEFT_KNEE"][i,x], data["LEFT_KNEE"][i,y]])
+      B = np.array([data["LEFT_ANKLE"][i,x], data["LEFT_ANKLE"][i,y]])
+      angle_calculated_left = central_angle(A, B, C)
+      
+      A = np.array([data["RIGHT_FOOT_INDEX"][i,x], data["RIGHT_FOOT_INDEX"][i,y]])
+      C = np.array([data["RIGHT_KNEE"][i,x], data["RIGHT_KNEE"][i,y]])
+      B = np.array([data["RIGHT_ANKLE"][i,x], data["RIGHT_ANKLE"][i,y]])
+      angle_calculated_right = central_angle(A, B, C)
+      angle_calculated = (angle_calculated_left + angle_calculated_right) / 2
+      if (angle_calculated < 55):
+        knee_wrong.append(i)
 
   #Print in terminal movement evaluation
   knee_errors_percent = 100 - (len(knee_wrong) / frames_amount) *100

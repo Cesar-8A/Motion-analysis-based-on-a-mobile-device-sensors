@@ -1,4 +1,4 @@
-def pull_up_ana(path,Video_label):
+def pull_up_ana(path,Video_label,Info_posture,Load_button):
     import cv2
     import mediapipe as mp
     import numpy as np
@@ -64,6 +64,8 @@ def pull_up_ana(path,Video_label):
 
     #For video
     cap = cv2.VideoCapture(path)
+    Info_posture.grid_remove()
+    Load_button.grid_remove()
     # Obtiene la velocidad de fotogramas (fps)
     frames_amount = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) 
 
