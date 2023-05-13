@@ -1,15 +1,11 @@
-def squat_ana(path,Video_label):
+def squat_ana(path,Video_label,Info_posture,Load_button):
   import cv2
   import mediapipe as mp
   import numpy as np
   import moviepy.editor as mpy
   import math
-  import tkinter
   from PIL import Image
   from PIL import ImageTk
-  import time
-  import matplotlib.pyplot as plt
-  from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
   def central_angle(vertex1, vertex2, vertex3):
     # Calcula la longitud de cada lado del triángulo
@@ -68,6 +64,8 @@ def squat_ana(path,Video_label):
 
   #For video
   cap = cv2.VideoCapture(path)
+  Info_posture.grid_remove()
+  Load_button.grid_remove()
   # Obtiene la velocidad de fotogramas (fps)
   frames_amount = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) 
 
@@ -132,7 +130,17 @@ def squat_ana(path,Video_label):
   #Too deep down hips movement
   deep_hip = []
   for i in range(frames_amount - 1):
-    if(((data["LEFT_KNEE"][i,y] - data["LEFT_HIP"][i,y]) < -0.030) or ((data["RIGHT_KNEE"][i,y] - data["RIGHT_HIP"][i,y]) < -0.030)):
+    A = np.array([data["LEFT_HIP"][i,x], data["LEFT_HIP"][i,y]])
+    C = np.array([data["LEFT_KNEE"][i,x], data["LEFT_KNEE"][i,y]])
+    B = np.array([data["LEFT_ANKLE"][i,x], data["LEFT_ANKLE"][i,y]])
+    angle_calculated_left = central_angle(A, B, C)
+    
+    A = np.array([data["RIGHT_HIP"][i,x], data["RIGHT_HIP"][i,y]])
+    C = np.array([data["RIGHT_KNEE"][i,x], data["RIGHT_KNEE"][i,y]])
+    B = np.array([data["RIGHT_ANKLE"][i,x], data["RIGHT_ANKLE"][i,y]])
+    angle_calculated_right = central_angle(A, B, C)
+    angle_calculated = (angle_calculated_left + angle_calculated_right) / 2
+    if (angle_calculated < 50):
       deep_hip.append(i)
 
   #Wrong knee movement
@@ -163,9 +171,9 @@ def squat_ana(path,Video_label):
     cv2.putText(editando, "Wrong knee position" , (0,150), cv2.FONT_HERSHEY_SIMPLEX, 1, (100,255,100), 2)
     images[knee_wrong[i]] = editando
   for i in range(len(deep_hip)):
-    editando = images[knee_wrong[i]]
+    editando = images[deep_hip[i]]
     cv2.putText(editando, "Too deep hip movement" , (0,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (100,255,100), 2)
-    images[knee_wrong[i]] = editando
+    images[deep_hip[i]] = editando
 
   # Crear un clip de ejemplo con un par de cuadros
   W, H = 1280, 720
@@ -195,10 +203,9 @@ def squat_ana(path,Video_label):
 
       if(((p in knee_wrong) or (p in deep_hip)) and step_brake == 0):
         step_brake = 1
-        print("Error detected")
-        input()
+        input("Error detected")
       if(not (p in knee_wrong or p in deep_hip) and step_brake == 1):
         step_brake = 0
       p += 1
-      Video_label.after(40, show)
+      Video_label.after(20, show)
   show()
