@@ -53,7 +53,7 @@ Buttons_background = tkinter.Canvas(Patient_main, width=280, height=720)
 Buttons_background.place(x=0,y=0)
 
 Body_measure = tkinter.Button(Patient_main, text="Modify body measure as height, weight, etc", font="Arial 12", command=show_body_measure, width=25, height=2,wraplength=200)
-Posture_button = tkinter.Button(Patient_main, text="Posture analyzer", font="Arial 12",command=show_posture, width=25, height=2,wraplength=200)
+Posture_button = tkinter.Button(Patient_main, text="Squat analyzer", font="Arial 12",command=show_posture, width=25, height=2,wraplength=200)
 Walk_button = tkinter.Button(Patient_main, text="Step analyzer", font="Arial 12", width=25, height=2,wraplength=200)
 
 Body_measure.grid(column=0,row=0,padx=25,pady=15)
