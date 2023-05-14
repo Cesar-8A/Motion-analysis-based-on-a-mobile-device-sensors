@@ -6,20 +6,18 @@ def squat_ana(path,Video_label,Info_posture,Load_button):
   import math
   from PIL import Image
   from PIL import ImageTk
-
+  #                  a      b           c 
   def central_angle(vertex1, vertex2, vertex3):
     # Calcula la longitud de cada lado del triángulo
-    a = math.dist(vertex1, vertex2)
-    b = math.dist(vertex2, vertex3)
-    c = math.dist(vertex3, vertex1)
+    a = math.dist(vertex3, vertex2)
+    b = math.dist(vertex1, vertex3)
+    c = math.dist(vertex2, vertex1)
     # Calcula el coseno del ángulo central correspondiente al lado b
     cos_B = (a**2 + c**2 - b**2) / (2 * a * c)
     # Calcula el ángulo central correspondiente al lado b
-    angle = 2 * math.acos(cos_B)
+    angle = math.acos(cos_B)
     angle = math.degrees(angle)
-    if(angle >= 90):
-      angle = abs((angle - 180))
-    # Convierte el ángulo a grados y lo devuelve
+    angle = abs(angle)
     return(angle)
 
   mp_drawing = mp.solutions.drawing_utils
@@ -67,7 +65,6 @@ def squat_ana(path,Video_label,Info_posture,Load_button):
   Info_posture.grid_remove()
   Load_button.grid_remove()
   # Obtiene la velocidad de fotogramas (fps)
-  frames_amount = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) 
 
   x = 0
   y = 1
@@ -130,32 +127,34 @@ def squat_ana(path,Video_label,Info_posture,Load_button):
   #Detection of start pose
   distance_shoulder_heel = []
 
-  for i in range(frames_amount):
+  for i in range(len(data[keys][:])):
     a = ((data["RIGHT_HEEL"][i,y] - data["RIGHT_SHOULDER"][i,y]) + (data["LEFT_HEEL"][i,y] - data["LEFT_SHOULDER"][i,y]) / 2)
     distance_shoulder_heel.append(a)
 
   holder = min(distance_shoulder_heel)
 
-  for i in range(frames_amount):
-    if (abs(holder - distance_shoulder_heel[i]) > 0.15):
+  for i in range(len(data[keys][:])):
+    if (abs(holder - distance_shoulder_heel[i]) > 0.2):
       distance_shoulder_heel[i] = 0
-  
+  print(distance_shoulder_heel)
   #Too deep down hips movement
   deep_hip = []
-  for i in range(frames_amount - 1):
+  for i in range(len(data[keys][:])):
     if(distance_shoulder_heel[i] > 0):
-      C = np.array([data["LEFT_HIP"][i,x], data["LEFT_HIP"][i,y]])
+      A = np.array([data["LEFT_HIP"][i,x], data["LEFT_HIP"][i,y]])
       B = np.array([data["LEFT_KNEE"][i,x], data["LEFT_KNEE"][i,y]])
-      A = np.array([data["LEFT_ANKLE"][i,x], data["LEFT_ANKLE"][i,y]])
+      C = np.array([data["LEFT_ANKLE"][i,x], data["LEFT_ANKLE"][i,y]])
       angle_calculated_left = central_angle(A, B, C)
       
-      C = np.array([data["RIGHT_HIP"][i,x], data["RIGHT_HIP"][i,y]])
+      A = np.array([data["RIGHT_HIP"][i,x], data["RIGHT_HIP"][i,y]])
       B = np.array([data["RIGHT_KNEE"][i,x], data["RIGHT_KNEE"][i,y]])
-      A = np.array([data["RIGHT_ANKLE"][i,x], data["RIGHT_ANKLE"][i,y]])
+      C = np.array([data["RIGHT_ANKLE"][i,x], data["RIGHT_ANKLE"][i,y]])
       angle_calculated_right = central_angle(A, B, C)
+      print(angle_calculated_left,"***",angle_calculated_right)
       angle_calculated = (angle_calculated_left + angle_calculated_right) / 2
+      print(angle_calculated)
       if (angle_calculated < 55):
-        """
+        
         dist_ankley_kneey_r = abs(data["RIGHT_HIP"][i,y] - data["RIGHT_KNEE"][i,y])
         dist_anklex_kneex_r = abs(data["RIGHT_HIP"][i,x] - data["RIGHT_KNEE"][i,x])
         dist_ankley_kneey_l = abs(data["LEFT_HIP"][i,y] - data["LEFT_KNEE"][i,y])
@@ -164,61 +163,59 @@ def squat_ana(path,Video_label,Info_posture,Load_button):
         start_angle_r = math.degrees(start_angle_r)
         start_angle_l = math.atan(dist_ankley_kneey_l / dist_anklex_kneex_l)
         start_angle_l = math.degrees(start_angle_l)
-        cv2.ellipse(images[i], (int(data["RIGHT_KNEE"][i,x] * width), int(data["RIGHT_KNEE"][i,y] * height)), (40, 40), 0, int(start_angle_r + angle_calculated_right), int(start_angle_r), (0, 255, 0), 5)
-        cv2.ellipse(images[i], (int(data["LEFT_KNEE"][i,x] * width), int(data["LEFT_KNEE"][i,y] * height)), (40, 40), 0, int(start_angle_l + angle_calculated_right), int(start_angle_l), (0, 255, 0), 5)
-        """
+        if(abs(data["RIGHT_HIP"][i,x] < data["RIGHT_KNEE"][i,x])):
+          cv2.ellipse(images[i], (int(data["RIGHT_KNEE"][i,x] * width), int(data["RIGHT_KNEE"][i,y] * height)), (25, 25), 0, (start_angle_r + 180 - angle_calculated_right), ((start_angle_r + 180 - angle_calculated_right) + angle_calculated_right), (0, 255, 0), 5)
+          cv2.ellipse(images[i], (int(data["LEFT_KNEE"][i,x] * width), int(data["LEFT_KNEE"][i,y] * height)), (25, 25), 0, (start_angle_l + 180 - angle_calculated_left), ((start_angle_l + 180 - angle_calculated_left) + angle_calculated_left), (0, 255, 0), 5)
+        else:
+          cv2.ellipse(images[i], (int(data["RIGHT_KNEE"][i,x] * width), int(data["RIGHT_KNEE"][i,y] * height)), (25, 25), 0, (start_angle_r ), ((start_angle_r ) + angle_calculated_right), (0, 255, 0), 5)
+          cv2.ellipse(images[i], (int(data["LEFT_KNEE"][i,x] * width), int(data["LEFT_KNEE"][i,y] * height)), (25, 25), 0, (start_angle_l ), ((start_angle_l ) + angle_calculated_left), (0, 255, 0), 5)
         deep_hip.append(i)
 
   #Wrong knee movement
   knee_wrong = []
-  for i in range(frames_amount - 1):
+  for i in range(len(data[keys][:])):
     if(distance_shoulder_heel[i] > 0):
       A = np.array([data["LEFT_FOOT_INDEX"][i,x], data["LEFT_FOOT_INDEX"][i,y]])
       C = np.array([data["LEFT_KNEE"][i,x], data["LEFT_KNEE"][i,y]])
-      B = np.array([data["LEFT_HEEL"][i,x], data["LEFT_HEEL"][i,y]])
+      B = np.array([data["LEFT_ANKLE"][i,x], data["LEFT_ANKLE"][i,y]])
       angle_calculated_left = central_angle(A, B, C)
       
       A = np.array([data["RIGHT_FOOT_INDEX"][i,x], data["RIGHT_FOOT_INDEX"][i,y]])
       C = np.array([data["RIGHT_KNEE"][i,x], data["RIGHT_KNEE"][i,y]])
-      B = np.array([data["RIGHT_HEEL"][i,x], data["RIGHT_HEEL"][i,y]])
+      B = np.array([data["RIGHT_ANKLE"][i,x], data["RIGHT_ANKLE"][i,y]])
       angle_calculated_right = central_angle(A, B, C)
       angle_calculated = (angle_calculated_left + angle_calculated_right) / 2
-      if (angle_calculated < 40):
-        """
-        dist_ankley_kneey_r = abs(data["RIGHT_HEEL"][i,y] - data["RIGHT_FOOT_INDEX"][i,y])
-        dist_anklex_kneex_r = abs(data["RIGHT_HEEL"][i,x] - data["RIGHT_FOOT_INDEX"][i,x])
-        dist_ankley_kneey_l = abs(data["LEFT_HEEL"][i,y] - data["LEFT_FOOT_INDEX"][i,y])
-        dist_anklex_kneex_l = abs(data["LEFT_HEEL"][i,x] - data["LEFT_FOOT_INDEX"][i,x])
+      if (angle_calculated < 90):
+        dist_ankley_kneey_r = abs(data["RIGHT_ANKLE"][i,y] - data["RIGHT_FOOT_INDEX"][i,y])
+        dist_anklex_kneex_r = abs(data["RIGHT_ANKLE"][i,x] - data["RIGHT_FOOT_INDEX"][i,x])
+        dist_ankley_kneey_l = abs(data["LEFT_ANKLE"][i,y] - data["LEFT_FOOT_INDEX"][i,y])
+        dist_anklex_kneex_l = abs(data["LEFT_ANKLE"][i,x] - data["LEFT_FOOT_INDEX"][i,x])
         start_angle_r = math.atan(dist_ankley_kneey_r / dist_anklex_kneex_r)
         start_angle_r = math.degrees(start_angle_r)
         start_angle_l = math.atan(dist_ankley_kneey_l / dist_anklex_kneex_l)
         start_angle_l = math.degrees(start_angle_l)
-        cv2.ellipse(images[i], (int(data["RIGHT_ANKLE"][i,x] * width), int(data["RIGHT_ANKLE"][i,y] * height)), (40, 40), 0, int(start_angle_r + angle_calculated_right), int(start_angle_r), (0, 255, 0), 5)
-        cv2.ellipse(images[i], (int(data["LEFT_ANKLE"][i,x] * width), int(data["LEFT_ANKLE"][i,y] * height)), (40, 40), 0, int(start_angle_l + angle_calculated_right), int(start_angle_l), (0, 255, 0), 5)
-        """
+        if(data["RIGHT_FOOT_INDEX"][i,x] > data["RIGHT_ANKLE"][i,x]):
+          cv2.ellipse(images[i], (int(data["RIGHT_ANKLE"][i,x] * width), int(data["RIGHT_ANKLE"][i,y] * height)), (25, 25), 0, (start_angle_r - angle_calculated_right), ((start_angle_r - angle_calculated_right) + angle_calculated_right), (0, 255, 0), 3)
+          cv2.ellipse(images[i], (int(data["LEFT_ANKLE"][i,x] * width), int(data["LEFT_ANKLE"][i,y] * height)), (25, 25), 0, (start_angle_l - angle_calculated_left), ((start_angle_l - angle_calculated_left) + angle_calculated_left), (0, 255, 0), 3)
+        else:
+          cv2.ellipse(images[i], (int(data["RIGHT_ANKLE"][i,x] * width), int(data["RIGHT_ANKLE"][i,y] * height)), (25, 25), 0, (start_angle_r + 180 - angle_calculated_right + 20), ((start_angle_r + 180 - angle_calculated_right + 20) + angle_calculated_right), (0, 255, 0), 3)
+          cv2.ellipse(images[i], (int(data["LEFT_ANKLE"][i,x] * width), int(data["LEFT_ANKLE"][i,y] * height)), (25, 25), 0, (start_angle_l + 180 - angle_calculated_left + 20), ((start_angle_l + 180 - angle_calculated_left + 20) + angle_calculated_left), (0, 255, 0), 3)
         knee_wrong.append(i)
 
   #Print in terminal movement evaluation
-  knee_errors_percent = 100 - (len(knee_wrong) / frames_amount) *100
-  hip_errors_percent = 100 - (len(deep_hip) / frames_amount) * 100
+  knee_errors_percent = 100 - (len(knee_wrong) / (len(data[keys][:]))) *100
+  hip_errors_percent = 100 - (len(deep_hip) / (len(data[keys][:]))) * 100
   print("Se tuvo una presición de la rodilla en un %.2f " % (knee_errors_percent))
   print("Se tuvo una presición de la cadera en un %.2f " % (hip_errors_percent))
 
   #Video anotations
   for i in range(len(knee_wrong)):
-    editando = images[knee_wrong[i]]
-    cv2.putText(editando, "Wrong knee position" , (0,150), cv2.FONT_HERSHEY_SIMPLEX, 1, (100,255,100), 2)
-    images[knee_wrong[i]] = editando
+    cv2.putText(images[knee_wrong[i]], "Wrong knee position" , (0,150), cv2.FONT_HERSHEY_SIMPLEX, 1, (100,255,100), 2)
   for i in range(len(deep_hip)):
-    editando = images[deep_hip[i]]
-    cv2.putText(editando, "Too deep hip movement" , (0,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (100,255,100), 2)
-    images[deep_hip[i]] = editando
+    cv2.putText(images[deep_hip[i]], "Too deep hip movement" , (0,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (100,255,100), 2)
 
   # Crear un clip de ejemplo con un par de cuadros
-  W, H = 1280, 720
-  duration = 6  # duración del video en segundos
   fps = 30  # cuadros por segundo
-  num_frames = duration * fps
 
   # Crear un clip a partir de los cuadros
   clip = mpy.ImageSequenceClip(images, fps=fps)
