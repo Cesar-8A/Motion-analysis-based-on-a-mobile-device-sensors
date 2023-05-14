@@ -157,7 +157,7 @@ def pull_up_ana(path,Video_label,Info_posture,Load_button):
 
     for i in range((frames_amount - 1)):
         if(distance_shoulder_wrist[i] > 0):
-            if((data["RIGHT_EYE"][i,y] < data["RIGHT_WRIST"][i,y]) and (data["LEFT_EYE"][i,y] < data["LEFT_WRIST"][i,y])):
+            if((data["NOSE"][i,y] > data["RIGHT_WRIST"][i,y]) and (data["NOSE"][i,y] > data["LEFT_WRIST"][i,y])):
                 low_lift.append(i)
 
     #Print in terminal movement evaluation
@@ -185,7 +185,7 @@ def pull_up_ana(path,Video_label,Info_posture,Load_button):
     # Crear un clip a partir de los cuadros
     clip = mpy.ImageSequenceClip(images, fps=fps)
     # Guardar el clip en formato mp4
-    clip.write_videofile('squat_procesado.mp4')
+    clip.write_videofile('pull_up_procesado.mp4')
 
     #show in tkinter window
     global step_brake

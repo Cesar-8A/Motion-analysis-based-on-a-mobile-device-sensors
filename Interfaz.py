@@ -16,7 +16,7 @@ def load_archive_pull_up():
     pull_up_ana(video_path,Video_label,Info_posture,Load_button_pull_up)
 
 #Analyzer button widgets
-Info_posture = tkinter.Label(Patient_main, text="Select a video to start", font="Arial 18")
+Info_posture = tkinter.Label(Patient_main, text="Select a video to start", font="Arial 18", fg="red")
 Squat_recomendations = tkinter.Label(Patient_main, text= "Load a video preferably from a side view (sagittal plane)", font="Arial 12")
 Pull_up_recomendations = tkinter.Label(Patient_main, text= "Load a video preferably from a front view (coronal plane)", font="Arial 12")
 Load_button_squat = tkinter.Button(Patient_main, text="Load", command=load_archive_squat,width=10, height=1)

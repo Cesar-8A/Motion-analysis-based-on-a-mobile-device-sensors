@@ -154,7 +154,7 @@ def squat_ana(path,Video_label,Info_posture,Load_button):
       B = np.array([data["RIGHT_ANKLE"][i,x], data["RIGHT_ANKLE"][i,y]])
       angle_calculated_right = central_angle(A, B, C)
       angle_calculated = (angle_calculated_left + angle_calculated_right) / 2
-      if (angle_calculated < 50):
+      if (angle_calculated < 60):
         deep_hip.append(i)
 
   #Wrong knee movement
@@ -171,7 +171,7 @@ def squat_ana(path,Video_label,Info_posture,Load_button):
       B = np.array([data["RIGHT_ANKLE"][i,x], data["RIGHT_ANKLE"][i,y]])
       angle_calculated_right = central_angle(A, B, C)
       angle_calculated = (angle_calculated_left + angle_calculated_right) / 2
-      if (angle_calculated < 55):
+      if (angle_calculated < 40):
         knee_wrong.append(i)
 
   #Print in terminal movement evaluation
