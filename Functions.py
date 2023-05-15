@@ -68,40 +68,40 @@ def mediapipe_estimation(path):
                 if not success:
                     print("End of video.")
                     break
-            # To improve performance, optionally mark the image as not writeable to
-            # pass by reference.
-            image.flags.writeable = False
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            results = pose.process(image)
-            #Store the data
-            if  isinstance(results.pose_landmarks, type(None)):
-            # Adding frame with its index
-                empty.append(frame_num)
-            else:
-                for key, i in zip(data.keys(), range(33)):
-                    data[key].append([results.pose_landmarks.landmark[i].x, results.pose_landmarks.landmark[i].y, results.pose_landmarks.landmark[i].z])
-            #Draw the landmarks
-            image.flags.writeable = True
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)      
-            mp_drawing.draw_landmarks(
-                image,
-                results.pose_landmarks,
-                mp_pose.POSE_CONNECTIONS,
-                landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
-            #Save the image in a mtrix
-            images.append(image)
+                # To improve performance, optionally mark the image as not writeable to
+                # pass by reference.
+                image.flags.writeable = False
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                results = pose.process(image)
+                #Store the data
+                if  isinstance(results.pose_landmarks, type(None)):
+                #Adding frame with its index
+                    empty.append(frame_num)
+                else:
+                    for key, i in zip(data.keys(), range(33)):
+                        data[key].append([results.pose_landmarks.landmark[i].x, results.pose_landmarks.landmark[i].y, results.pose_landmarks.landmark[i].z])
+                #Draw the landmarks
+                image.flags.writeable = True
+                image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)      
+                mp_drawing.draw_landmarks(
+                    image,
+                    results.pose_landmarks,
+                    mp_pose.POSE_CONNECTIONS,
+                    landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+                #Save the image in a mtrix
+                images.append(image)
             # Flip the image horizontally for a selfie-view display.
-        #Make them numpy
-        for key in data.keys():
-            data[key] = np.array(data[key])
-            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        cap.release()
+            #Make them numpy
+            for key in data.keys():
+                data[key] = np.array(data[key])
+                width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            cap.release()
 
     for keys in data.keys():
         for i in range(len(data[keys][:])):
             cv2.circle(images[i], (int(data[keys][i,x]*width), int(data[keys][i,y]*height)), radius=5, color=[255,0,0], thickness=-1)
-    return(images,width,height)
+    return(images,width,height,data,keys)
 
 
 def angle_estimation(vertex1, vertex2, vertex3):
@@ -118,11 +118,11 @@ def angle_estimation(vertex1, vertex2, vertex3):
     angle = abs(angle)
     return(angle)
 
-def video_exportation(images):
+def video_exportation(images,name):
     import moviepy.editor as mpy
     # Crear un clip de ejemplo con un par de cuadros
     fps = 30  # cuadros por segundo
     # Crear un clip a partir de los cuadros
     clip = mpy.ImageSequenceClip(images, fps=fps)
      # Guardar el clip en formato mp4
-    clip.write_videofile('squat_procesado.mp4')
+    clip.write_videofile(name)

@@ -2,25 +2,10 @@ def pull_up_ana(path,Video_label,Info_posture,Load_button):
     import cv2
     import mediapipe as mp
     import numpy as np
-    import moviepy.editor as mpy
+    import Functions as f
     import math
     from PIL import Image
     from PIL import ImageTk
-
-    def central_angle(vertex1, vertex2, vertex3):
-        # Calcula la longitud de cada lado del triángulo
-        a = math.dist(vertex1, vertex2)
-        b = math.dist(vertex2, vertex3)
-        c = math.dist(vertex3, vertex1)
-        # Calcula el coseno del ángulo central correspondiente al lado b
-        cos_B = (a**2 + c**2 - b**2) / (2 * a * c)
-        # Calcula el ángulo central correspondiente al lado b
-        angle = 2 * math.acos(cos_B)
-        angle = math.degrees(angle)
-        if(angle >= 90):
-            angle = abs((angle - 180))
-        # Convierte el ángulo a grados y lo devuelve
-        return(angle)
 
     mp_drawing = mp.solutions.drawing_utils
     mp_drawing_styles = mp.solutions.drawing_styles
@@ -176,17 +161,8 @@ def pull_up_ana(path,Video_label,Info_posture,Load_button):
         cv2.putText(editando, "Incomplete lift" , (0,150), cv2.FONT_HERSHEY_SIMPLEX, 1, (100,255,100), 2)
         images[low_lift[i]] = editando
 
-    # Crear un clip de ejemplo con un par de cuadros
-    W, H = 1280, 720
-    duration = 6  # duración del video en segundos
-    fps = 30  # cuadros por segundo
-    num_frames = duration * fps
-
-    # Crear un clip a partir de los cuadros
-    clip = mpy.ImageSequenceClip(images, fps=fps)
-    # Guardar el clip en formato mp4
-    clip.write_videofile('pull_up_procesado.mp4')
-
+    file_name = ("Pull_up_anotada.mp4")
+    f.video_exportation(images,file_name)
     #show in tkinter window
     global step_brake
     step_brake = 0
