@@ -113,36 +113,33 @@ def pull_up_ana(path,Video_label,Info_posture,Load_button):
             cv2.circle(images[i], (int(data[keys][i,x]*width), int(data[keys][i,y]*height)), radius=5, color=[255,0,0], thickness=-1)
 
     # Too close hands
-
     bad_hand_position = []
-
     for i in range((frames_amount - 1)):
         distance_shoulder = math.sqrt(pow((data["RIGHT_SHOULDER"][i,x] - data["LEFT_SHOULDER"][i,x]),2) + pow((data["RIGHT_SHOULDER"][i,y] - data["LEFT_SHOULDER"][i,y]),2))
         distance_wrist = math.sqrt(pow((data["RIGHT_WRIST"][i,x] - data["LEFT_WRIST"][i,x]),2) + pow((data["RIGHT_WRIST"][i,y] - data["LEFT_WRIST"][i,y]),2))
         if(abs(distance_shoulder - distance_wrist) < 0.01):
+            cv2.putText(images[i], "Open more the hands" , (0,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (100,255,100), 2)
             bad_hand_position.append(i)
 
     #detect start of pull up
     distance_shoulder_wrist = []
-
     for i in range(frames_amount - 1):
         a = math.sqrt(pow((data["RIGHT_SHOULDER"][i,x] - data["RIGHT_WRIST"][i,x]),2) + pow((data["RIGHT_SHOULDER"][i,y] - data["RIGHT_WRIST"][i,y]),2))
         b = math.sqrt(pow((data["LEFT_SHOULDER"][i,x] - data["LEFT_WRIST"][i,x]),2) + pow((data["LEFT_SHOULDER"][i,y] - data["LEFT_WRIST"][i,y]),2))
         c = (a + b) / 2
         distance_shoulder_wrist.append(c)
-
     holder = min(distance_shoulder_wrist)
-
     for i in range(frames_amount - 1):
-        if (abs(holder - distance_shoulder_wrist[i]) > 0.012):
+        if (abs(holder - distance_shoulder_wrist[i]) > 0.01):
             distance_shoulder_wrist[i] = 0
+
     # Too low lift
-
     low_lift = []
-
     for i in range((frames_amount - 1)):
         if(distance_shoulder_wrist[i] > 0):
-            if((data["NOSE"][i,y] > data["RIGHT_WRIST"][i,y]) and (data["NOSE"][i,y] > data["LEFT_WRIST"][i,y])):
+            lift_estimated = ((data["NOSE"][i,y] - data["RIGHT_WRIST"][i,y]) + (data["NOSE"][i,y] - data["LEFT_WRIST"][i,y]) / 2)
+            if(lift_estimated > 0):
+                cv2.putText(images[i], "Incomplete lift" , (0,150), cv2.FONT_HERSHEY_SIMPLEX, 1, (100,255,100), 2)
                 low_lift.append(i)
 
     #Print in terminal movement evaluation
@@ -151,18 +148,10 @@ def pull_up_ana(path,Video_label,Info_posture,Load_button):
     print("Se tuvo una presición de las manos en un %.2f " % (hand_error_percent))
     print("Se tuvo una presición de elevación en un %.2f " % (lift_error_percent))
 
-    #Video anotations
-    for i in range(len(bad_hand_position)):
-        editando = images[bad_hand_position[i]]
-        cv2.putText(editando, "Open more the hands" , (0,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (100,255,100), 2)
-        images[bad_hand_position[i]] = editando
-    for i in range(len(low_lift)):
-        editando = images[low_lift[i]]
-        cv2.putText(editando, "Incomplete lift" , (0,150), cv2.FONT_HERSHEY_SIMPLEX, 1, (100,255,100), 2)
-        images[low_lift[i]] = editando
-
+    #Export video
     file_name = ("Pull_up_anotada.mp4")
     f.video_exportation(images,file_name)
+
     #show in tkinter window
     global step_brake
     step_brake = 0
