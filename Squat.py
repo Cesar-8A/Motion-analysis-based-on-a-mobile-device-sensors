@@ -137,9 +137,7 @@ def squat_ana(path,Video_label,Info_posture,Load_button):
       B = np.array([data["RIGHT_KNEE"][i,x], data["RIGHT_KNEE"][i,y]])
       C = np.array([data["RIGHT_ANKLE"][i,x], data["RIGHT_ANKLE"][i,y]])
       angle_calculated_right = f.angle_estimation(A, B, C)
-      print(angle_calculated_left,"***",angle_calculated_right)
       angle_calculated = (angle_calculated_left + angle_calculated_right) / 2
-      print(angle_calculated)
       if (angle_calculated < 55):
         cv2.putText(images[i], "Too deep hip movement, actual angle: " ,(0,150), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (100,255,100), 2)
         cv2.putText(images[i], str(angle_calculated) ,(500,150), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (100,255,100), 2)
