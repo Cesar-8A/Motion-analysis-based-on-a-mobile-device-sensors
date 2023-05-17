@@ -3,6 +3,7 @@ from tkinter import filedialog
 from Squat import squat_ana
 from Pull_up import pull_up_ana
 from Push_up import Push_up_ana
+from Position import Posture_ana
 
 
 Patient_main = tkinter.Tk()
@@ -21,20 +22,28 @@ def load_archive_push_up():
     video_path = filedialog.askopenfilename(filetypes=[("all video files",".mp4")])
     Push_up_ana(video_path,Video_label,Info_posture,Load_button_pull_up)
 
+def load_archive_posture():
+    image_path = filedialog.askopenfilename(filetypes=[("all images files",".jpeg")])
+    Posture_ana(image_path,Image_label)
+
 #Analyzer button widgets
 Info_posture = tkinter.Label(Patient_main, text="Select a video to start", font="Arial 18", fg="red")
 Squat_recomendations = tkinter.Label(Patient_main, text= "Load a video preferably from a side view (sagittal plane)", font="Arial 12")
 Pull_up_recomendations = tkinter.Label(Patient_main, text= "Load a video preferably from a front view (coronal plane)", font="Arial 12")
 Push_up_recomendations = tkinter.Label(Patient_main, text= "Load a video preferably from a side view (sagittal plane)", font="Arial 12")
+Posture_recomendations = tkinter.Label(Patient_main, text= "Load a image preferably from a side view (sagittal plane)", font="Arial 12")
 Load_button_squat = tkinter.Button(Patient_main, text="Load", command=load_archive_squat,width=10, height=1)
 Load_button_pull_up = tkinter.Button(Patient_main, text="Load", command=load_archive_pull_up,width=10, height=1)
 Load_button_push_up = tkinter.Button(Patient_main, text="Load", command=load_archive_push_up,width=10, height=1)
+Load_button_posture = tkinter.Button(Patient_main, text="Load", command=load_archive_posture,width=10, height=1)
 Video_label = tkinter.Label(Patient_main)
+Image_label = tkinter.Label(Patient_main)
 
 
 def show_squat_recomendations():
     hide_pull_up_recomendations()
     hide_push_up_recomendations()
+    hide_posture_recomendations()
     Info_posture.grid(column=5, row=0)
     Squat_recomendations.grid(column= 5, row= 1)
     Load_button_squat.grid(column=10, row=1)
@@ -43,10 +52,20 @@ def show_squat_recomendations():
 def show_pull_up_recomendations():
     hide_squat_recomendations()
     hide_push_up_recomendations()
+    hide_posture_recomendations()
     Info_posture.grid(column=5, row=0)
     Pull_up_recomendations.grid(column= 5, row= 1)
     Load_button_pull_up.grid(column=10, row=1)
     Video_label.place(x=700, y=150)
+
+def show_push_up_recomendations():
+    hide_pull_up_recomendations()
+    hide_squat_recomendations()
+    hide_posture_recomendations()
+    Info_posture.grid(column=5, row=0)
+    Push_up_recomendations.grid(column= 5, row= 1)
+    Load_button_push_up.grid(column=10, row=1)
+    Video_label.place(x=400, y=150)
 
 def hide_pull_up_recomendations():
     Info_posture.grid_remove()
@@ -60,19 +79,26 @@ def hide_squat_recomendations():
     Squat_recomendations.grid_remove()
     Video_label.place_forget()
 
-def show_push_up_recomendations():
-    hide_pull_up_recomendations()
-    hide_squat_recomendations()
-    Info_posture.grid(column=5, row=0)
-    Push_up_recomendations.grid(column= 5, row= 1)
-    Load_button_push_up.grid(column=10, row=1)
-    Video_label.place(x=400, y=150)
-
 def hide_push_up_recomendations():
     Info_posture.grid_remove()
     Push_up_recomendations.grid_remove()
     Load_button_squat.grid_remove()
     Video_label.place_forget()
+
+def show_posture_recomendations():
+    hide_pull_up_recomendations()
+    hide_squat_recomendations()
+    hide_push_up_recomendations()
+    Info_posture.grid(column=5, row=0)
+    Posture_recomendations.grid(column= 5, row= 1)
+    Load_button_posture.grid(column=10, row=1)
+    Image_label.place(x=400, y=150)
+
+def hide_posture_recomendations():
+    Info_posture.grid_remove()
+    Posture_recomendations.grid_remove()
+    Load_button_posture.grid_remove()
+    Image_label.place_forget()
 
 
 Buttons_background = tkinter.Canvas(Patient_main, width=280, height=720)
@@ -81,10 +107,12 @@ Buttons_background.place(x=0,y=0)
 Squat_button = tkinter.Button(Patient_main, text="Squat analyzer", font="Arial 12",command=show_squat_recomendations, width=25, height=2,wraplength=200)
 Pull_up_button = tkinter.Button(Patient_main, text="Pull up analyzer", font="Arial 12",command=show_pull_up_recomendations, width=25, height=2,wraplength=200)
 Push_up_button = tkinter.Button(Patient_main, text="Push up analyzer", font="Arial 12",command=show_push_up_recomendations, width=25, height=2,wraplength=200)
+Posture_button = tkinter.Button(Patient_main, text="Posture analyzer", font="Arial 12",command=show_posture_recomendations, width=25, height=2,wraplength=200)
 
 Squat_button.grid(column=0,row=0,padx=25,pady=25)
 Pull_up_button.grid(column=0,row=1)
 Push_up_button.grid(column=0,row=2, pady=25)
+Posture_button.grid(column=0,row=3)
 
 Buttons_background.create_rectangle(0, 0, 280, 720, fill="green")
 
