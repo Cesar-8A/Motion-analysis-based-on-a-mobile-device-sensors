@@ -253,12 +253,15 @@ def Push_up_ana(path,Video_label,Info_posture,Load_button):
         frame += 1
     file_name = "push_up.mp4"
     f.video_exportation(images,file_name)
-
+    
     #show in tkinter window
     global step_brake
     step_brake = 0
     global p
     p = 0
+    print(Knee_wrong)
+    print(Elbow_wrong)
+    print(Hip_wrong)
     def show():
         global step_brake
         global p
@@ -269,10 +272,11 @@ def Push_up_ana(path,Video_label,Info_posture,Load_button):
             Video_label.configure(image=img)
             Video_label.image = img
 
-            if(((p in Knee_wrong) or (p in Elbow_wrong) or (Hip_wrong)) and step_brake == 0):
+            if(((p in Knee_wrong) or (p in Elbow_wrong) or (p in Hip_wrong)) and step_brake == 0):
                 step_brake = 1
                 input("Error detected")
-            if((p not in Knee_wrong) and (p not in Elbow_wrong) and (p not in Hip_wrong) and step_brake == 1):
+            if(not ((p in Knee_wrong) or (p in Elbow_wrong) or (p in Hip_wrong)) and step_brake == 1):
+                print("aaaaaaa")
                 step_brake = 0
             p += 1
             
