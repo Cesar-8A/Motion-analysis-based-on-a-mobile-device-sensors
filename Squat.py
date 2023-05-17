@@ -158,7 +158,7 @@ def squat_ana(path,Video_label,Info_posture,Load_button):
       B = np.array([data["RIGHT_ANKLE"][i,x], data["RIGHT_ANKLE"][i,y]])
       angle_calculated_right = f.angle_estimation(A, B, C)
       angle_calculated = (angle_calculated_left + angle_calculated_right) / 2
-      if (angle_calculated < 80):
+      if (angle_calculated < 40):
         cv2.putText(images[i], "Too much knee movement, actual angle: " , (0,50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (100,255,100), 2)
         cv2.putText(images[i], str(angle_calculated), (500,50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (100,255,100), 2)
         f.angle_draw(data["RIGHT_KNEE"][i,x], data["RIGHT_ANKLE"][i,x], data["RIGHT_KNEE"][i,y], data["RIGHT_ANKLE"][i,y], data["LEFT_KNEE"][i,x], data["LEFT_ANKLE"][i,x], data["LEFT_KNEE"][i,y], data["LEFT_ANKLE"][i,y], angle_calculated_right, angle_calculated_left, images[i], width, height)
