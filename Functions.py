@@ -126,3 +126,26 @@ def video_exportation(images,name):
     clip = mpy.ImageSequenceClip(images, fps=fps)
      # Guardar el clip en formato mp4
     clip.write_videofile(name)
+
+def angle_draw(arx, brx, ary, bry, alx, blx, aly, bly, angler, anglel, frame, width, height):
+    """
+    hemmm, calcula el angulo para graficarlo xd
+
+
+    """
+    import math
+    import cv2
+    dist_abr_y = abs(ary - bry)
+    dist_abr_x = abs(arx - brx)
+    dist_abl_y = abs(aly - bly)
+    dist_abl_x = abs(alx - blx)
+    start_angle_r = math.atan(dist_abr_y / dist_abr_x)
+    start_angle_r = math.degrees(start_angle_r)
+    start_angle_l = math.atan(dist_abl_y / dist_abl_x)
+    start_angle_l = math.degrees(start_angle_l)
+    if(abs(arx < brx)):
+        cv2.ellipse(frame, (int(brx * width), int(bry * height)), (25, 25), 0, (start_angle_r + 180 - angler), ((start_angle_r + 180 - angler) + angler), (0, 0, 0), 5)
+        cv2.ellipse(frame, (int(blx * width), int(bly * height)), (25, 25), 0, (start_angle_l + 180 - anglel), ((start_angle_l + 180 - anglel) + anglel), (0, 0, 0), 5)
+    else:
+        cv2.ellipse(frame, (int(brx * width), int(bry * height)), (25, 25), 0, (start_angle_r ), ((start_angle_r ) + angler), (0, 255, 0), 5)
+        cv2.ellipse(frame, (int(blx * width), int(bly * height)), (25, 25), 0, (start_angle_l ), ((start_angle_l ) + anglel), (0, 255, 0), 5)

@@ -141,7 +141,9 @@ def squat_ana(path,Video_label,Info_posture,Load_button):
       if (angle_calculated < 55):
         cv2.putText(images[i], "Too deep hip movement, actual angle: " ,(0,150), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (100,255,100), 2)
         cv2.putText(images[i], str(angle_calculated) ,(500,150), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (100,255,100), 2)
-        dist_ankley_kneey_r = abs(data["RIGHT_HIP"][i,y] - data["RIGHT_KNEE"][i,y])
+        f.angle_draw(data["RIGHT_HIP"][i,x], data["RIGHT_KNEE"][i,x], data["RIGHT_HIP"][i,y], data["RIGHT_KNEE"][i,y], data["LEFT_HIP"][i,x], data["LEFT_KNEE"][i,x], data["LEFT_HIP"][i,y], data["LEFT_KNEE"][i,y], angle_calculated_right, angle_calculated_left, images[i], width, height)
+        """
+        dist_ankley_kneey_r = abs(data["RIGHT_HIP"][i,y] - data["RIGHT_HIP"][i,y] )
         dist_anklex_kneex_r = abs(data["RIGHT_HIP"][i,x] - data["RIGHT_KNEE"][i,x])
         dist_ankley_kneey_l = abs(data["LEFT_HIP"][i,y] - data["LEFT_KNEE"][i,y])
         dist_anklex_kneex_l = abs(data["LEFT_HIP"][i,x] - data["LEFT_KNEE"][i,x])
@@ -155,6 +157,7 @@ def squat_ana(path,Video_label,Info_posture,Load_button):
         else:
           cv2.ellipse(images[i], (int(data["RIGHT_KNEE"][i,x] * width), int(data["RIGHT_KNEE"][i,y] * height)), (25, 25), 0, (start_angle_r ), ((start_angle_r ) + angle_calculated_right), (0, 255, 0), 5)
           cv2.ellipse(images[i], (int(data["LEFT_KNEE"][i,x] * width), int(data["LEFT_KNEE"][i,y] * height)), (25, 25), 0, (start_angle_l ), ((start_angle_l ) + angle_calculated_left), (0, 255, 0), 5)
+        """
         deep_hip.append(i)
 
   #Wrong knee movement
